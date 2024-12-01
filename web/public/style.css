@@ -1,0 +1,33 @@
+:root {
+  font-family: Ubuntu, system-ui, sans-serif;
+  line-height: 1;
+  font-weight: 400;
+  font-size: x-large;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  flex-direction: column;
+}
+
+body > * {
+  margin: 0.5rem;
+}
+
+#app {
+  max-width: 1280px;
+  margin-top: 2rem;
+  text-align: center;
+}
+
+#stream {
+  margin-top: 2rem;
+  border: 2px dashed #3498db;
+}

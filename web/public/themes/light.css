@@ -1,0 +1,8 @@
+body {
+  background-color: lightpink;
+}
+
+textarea {
+  border: none;
+  border-radius: 1rem;
+}

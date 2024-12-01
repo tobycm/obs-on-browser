@@ -1,0 +1,41 @@
+body {
+  background-color: #1e1e1e;
+}
+
+* {
+  color: #e6e6e6;
+}
+
+a {
+  color: #ffcc00;
+}
+
+input {
+  background-color: #333;
+}
+
+select {
+  background-color: #333;
+}
+
+select:disabled {
+  color: #666;
+}
+
+button {
+  background-color: #333;
+}
+
+button:disabled {
+  color: #666;
+}
+
+#themeButton {
+  font-size: 2rem;
+}
+
+textarea {
+  border: none;
+  border-radius: 1rem;
+  background-color: #333;
+}

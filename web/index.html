@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml" />
+    <!-- Fallback to PNGs if no SVG support -->
+    <link rel="shortcut icon" href="/favicon.png" type="image/png" />
+
+    <!-- Open Graph meta tags -->
+    <meta property="og:title" content="OBB - OBS on the Browser" />
+    <meta property="og:description" content="Open Broadcasting software on the Browser (OBB). Made by tobycm" />
+    <meta property="og:image" content="/favicon.png" />
+    <meta property="og:url" content="https://obb.tobycm.dev/" />
+    <meta property="og:site_name" content="Open Broadcasting software on the Browser" />
+
+    <link rel="stylesheet" href="style.css" />
+
+    <link rel="stylesheet" id="theme" href="/themes/light.css" />
+    <link rel="preload" href="/themes/dark.css" as="style" />
+
+    <script type="module" async src="/src/theme.ts"></script>
+
+    <title>OBB - OBS on the Browser</title>
+  </head>
+  <body>
+    <img src="/favicon.svg" alt="OBB - OBS on the Browser logo" style="height: 10vh; margin-top: 2rem" />
+    <h1 style="margin-bottom: 1.5rem">OBB - OBS on the Browser</h1>
+
+    <div>
+      <label for="streamQuality">Quality</label>
+      <select name="Stream Quality" id="streamQuality">
+        <option value="1080p">1080p</option>
+        <option value="720p" selected>720p</option>
+        <option value="480p">480p</option>
+        <option value="360p">360p</option>
+        <option value="240p">240p</option>
+      </select>
+    </div>
+    <div>
+      <label for="streamFps">FPS</label>
+      <select name="StreamFPS" id="streamFps">
+        <option value="60">60</option>
+        <option value="30" selected>30</option>
+        <option value="24">24</option>
+        <option value="15">15</option>
+      </select>
+    </div>
+
+    <div>
+      <button id="startStream" data-streaming="false">Stream</button>
+      <select name="from" id="streamSource">
+        <option value="screen" selected>Screen</option>
+        <option value="camera">Camera</option>
+      </select>
+    </div>
+
+    <video id="stream" autoplay playsinline muted hidden></video>
+
+    <button id="goLive" disabled>Go Live 📺</button>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
