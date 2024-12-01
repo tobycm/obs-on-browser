@@ -1,5 +1,5 @@
 <div style="display: flex; width: 100%">
-    <img src="./public/favicon.svg" style="margin: 0 auto; height: 200px">
+    <img src="./web/public/favicon.svg" style="margin: 0 auto; height: 200px">
 </div>
 
 # OBB - OBS on the Browser
@@ -27,24 +27,39 @@ git clone https://github.com/tobycm/obb
 ### 2. Install dependencies
 
 ```sh
+cd web
 bun i
+cd ..
+
+cd server
+bun i
+cd ..
 ```
 
 ### 3. Run the development server
 
 ```sh
+cd web
+bun run dev
+```
+
+in another terminal
+
+```sh
+cd server
 bun run dev
 ```
 
 Live at [localhost:5173](http://localhost:5173)
 
-### 4. Build for production
+### 4. Build for production (web-only, optional)
 
 ```sh
+cd web
 bun run build
 ```
 
-Files are output to the `dist` directory.
+Files are output to the `web/dist` directory.
 
 ## 📚 Tech Stack
 

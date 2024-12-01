@@ -1,0 +1,21 @@
+{
+  "name": "obb-server",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "@types/ws": "^8.5.13"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@roamhq/wrtc": "^0.8.0",
+    "tsx": "^4.19.2",
+    "ws": "^8.18.0"
+  },
+  "scripts": {
+    "dev": "tsx watch index.ts",
+    "start": "tsx index.ts"
+  }
+}

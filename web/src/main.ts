@@ -2,28 +2,28 @@ import "@fontsource/ubuntu/400.css";
 import "@fontsource/ubuntu/500.css";
 import "@fontsource/ubuntu/700.css";
 
-import interact from "interactjs";
+// import interact from "interactjs";
 
-// Make the element draggable
-interact(".draggable").draggable({
-  listeners: {
-    start(event) {
-      console.log("Drag started:", event);
-    },
-    move(event) {
-      const target = event.target as HTMLElement;
-      const x = (parseFloat(target.dataset.x || "0") || 0) + event.dx;
-      const y = (parseFloat(target.dataset.y || "0") || 0) + event.dy;
+// // Make the element draggable
+// interact(".draggable").draggable({
+//   listeners: {
+//     start(event) {
+//       console.log("Drag started:", event);
+//     },
+//     move(event) {
+//       const target = event.target as HTMLElement;
+//       const x = (parseFloat(target.dataset.x || "0") || 0) + event.dx;
+//       const y = (parseFloat(target.dataset.y || "0") || 0) + event.dy;
 
-      target.style.transform = `translate(${x}px, ${y}px)`;
-      target.dataset.x = x.toString();
-      target.dataset.y = y.toString();
-    },
-    end(event) {
-      console.log("Drag ended:", event);
-    },
-  },
-});
+//       target.style.transform = `translate(${x}px, ${y}px)`;
+//       target.dataset.x = x.toString();
+//       target.dataset.y = y.toString();
+//     },
+//     end(event) {
+//       console.log("Drag ended:", event);
+//     },
+//   },
+// });
 
 const settings: {
   quality: keyof typeof resolutions;
@@ -141,6 +141,59 @@ startStreamButton.addEventListener("click", async (event) => {
     streamFpsSelect.disabled = false;
 
     goLiveButton.disabled = true;
+  }
+
+  button.disabled = false;
+});
+
+let ws = new WebSocket("ws://localhost:5000");
+
+function connectWs(url = "ws://localhost:5000") {
+  ws = new WebSocket(url);
+
+  ws.addEventListener("open", () => {
+    console.log("WebSocket opened");
+  });
+
+  ws.addEventListener("message", async (event) => {
+    console.log("WebSocket message:", event.data);
+  });
+
+  ws.addEventListener("close", (event) => {
+    console.log("WebSocket closed:", event.code, event.reason);
+  });
+}
+
+let mediaRecorder: MediaRecorder;
+
+goLiveButton.addEventListener("click", async (event) => {
+  const button = event.target as HTMLButtonElement;
+
+  button.disabled = true;
+
+  if (button.dataset.live === "false") {
+    connectWs();
+
+    mediaRecorder = new MediaRecorder(stream, {
+      mimeType: "video/webm; codecs=vp8",
+    });
+
+    mediaRecorder.ondataavailable = (event) => {
+      console.log("MediaRecorder data available:", event.data.size);
+      if (ws.readyState === WebSocket.OPEN && event.data.size > 0) ws.send(event.data);
+    };
+
+    mediaRecorder.start(166.67);
+
+    button.textContent = "End Stream 🛑";
+    button.dataset.live = "true";
+  } else {
+    mediaRecorder.stop();
+
+    ws.close();
+
+    button.textContent = "Go Live 🎥";
+    button.dataset.live = "false";
   }
 
   button.disabled = false;
