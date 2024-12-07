@@ -29,7 +29,7 @@
     <h1 style="margin-bottom: 1.5rem">OBB - OBS on the Browser</h1>
 
     <div>
-      <label for="streamQuality">Quality</label>
+      <label for="streamQuality">Quality:</label>
       <select name="Stream Quality" id="streamQuality">
         <option value="1080p">1080p</option>
         <option value="720p" selected>720p</option>
@@ -39,7 +39,7 @@
       </select>
     </div>
     <div>
-      <label for="streamFps">FPS</label>
+      <label for="streamFps">FPS:</label>
       <select name="StreamFPS" id="streamFps">
         <option value="60">60</option>
         <option value="30" selected>30</option>
@@ -57,6 +57,12 @@
     </div>
 
     <video id="stream" autoplay playsinline muted hidden></video>
+
+    <div>
+      <label for="streamKey">Stream Key:</label>
+      <input type="password" id="streamKey" placeholder="Stream Key" />
+      <button id="saveStreamKey">Save</button>
+    </div>
 
     <button id="goLive" disabled data-live="false">Go Live 📺</button>
 

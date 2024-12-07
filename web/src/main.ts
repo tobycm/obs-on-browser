@@ -86,6 +86,13 @@ async function startStream(from: "camera" | "screen") {
       height: resolutions[settings.quality].height,
       frameRate: { ideal: settings.fps },
     },
+    audio: {
+      channelCount: 2,
+      sampleRate: 48000,
+      autoGainControl: false,
+      echoCancellation: false,
+      noiseSuppression: false,
+    },
   });
 
   videoElement.srcObject = stream;
@@ -116,7 +123,12 @@ startStreamButton.addEventListener("click", async (event) => {
   if (button.dataset.streaming === "false") {
     const source = sourceSelect.value as "camera" | "screen";
 
-    stream = await startStream(source);
+    try {
+      stream = await startStream(source);
+    } catch (error) {
+      button.disabled = false;
+      return;
+    }
 
     button.textContent = "Stop Stream 🛑";
     button.dataset.streaming = "true";
@@ -146,23 +158,49 @@ startStreamButton.addEventListener("click", async (event) => {
   button.disabled = false;
 });
 
-let ws = new WebSocket("ws://localhost:5000");
+let ws: WebSocket;
 
-function connectWs(url = "ws://localhost:5000") {
-  ws = new WebSocket(url);
+const connectWs = (url = "ws://localhost:5000") =>
+  new Promise((resolve) => {
+    ws = new WebSocket(url);
 
-  ws.addEventListener("open", () => {
-    console.log("WebSocket opened");
+    ws.addEventListener("open", () => {
+      console.log("WebSocket opened");
+      resolve(ws);
+    });
+
+    ws.addEventListener("message", async (event) => {
+      console.log("WebSocket message:", event.data);
+    });
+
+    ws.addEventListener("close", (event) => {
+      console.log("WebSocket closed:", event.code, event.reason);
+
+      mediaRecorder?.stop();
+
+      goLiveButton.textContent = "Go Live 🎥";
+      goLiveButton.dataset.live = "false";
+    });
   });
 
-  ws.addEventListener("message", async (event) => {
-    console.log("WebSocket message:", event.data);
-  });
+const streamKeyInput = document.getElementById("streamKey") as HTMLInputElement;
 
-  ws.addEventListener("close", (event) => {
-    console.log("WebSocket closed:", event.code, event.reason);
-  });
-}
+streamKeyInput.addEventListener("change", (event) => {
+  const target = event.target as HTMLInputElement;
+  const streamKey = target.value;
+
+  goLiveButton.disabled = !streamKey;
+});
+
+const mimeTypes = [
+  "video/webm; codecs=avc1.42E01E, mp4a.40.2",
+  "video/webm; codecs=avc1.42E01E, opus",
+  "video/webm; codecs=vp8,opus",
+  //
+];
+const mimeType = mimeTypes.find((mime) => MediaRecorder.isTypeSupported(mime)) ?? "video/webm; codecs=vp8,opus";
+
+console.log(`Best mimeType: ${mimeType}`);
 
 let mediaRecorder: MediaRecorder;
 
@@ -172,25 +210,51 @@ goLiveButton.addEventListener("click", async (event) => {
   button.disabled = true;
 
   if (button.dataset.live === "false") {
-    connectWs();
+    try {
+      await connectWs();
+    } catch (error) {
+      button.disabled = false;
+      return;
+    }
 
-    mediaRecorder = new MediaRecorder(stream, {
-      mimeType: "video/webm; codecs=vp8",
-    });
+    mediaRecorder = new MediaRecorder(stream, { mimeType, audioBitsPerSecond: 192000 });
+
+    // let recordedChunks: Blob[] = [];
 
     mediaRecorder.ondataavailable = (event) => {
-      console.log("MediaRecorder data available:", event.data.size);
+      console.log("MediaRecorder data available:", event.data.type, event.data.size);
+      // recordedChunks.push(event.data);
       if (ws.readyState === WebSocket.OPEN && event.data.size > 0) ws.send(event.data);
     };
 
-    mediaRecorder.start(166.67);
+    mediaRecorder.onstop = () => {
+      // const blob = new Blob(recordedChunks, { type: "video/webm" });
+      // const url = URL.createObjectURL(blob);
+
+      // // Create a download link
+      // const a = document.createElement("a");
+      // a.style.display = "none";
+      // a.href = url;
+      // a.download = "recorded-video.webm"; // Set the name of the file
+      // document.body.appendChild(a);
+      // a.click(); // Trigger the download
+
+      // // Clean up the object URL after the download
+      // URL.revokeObjectURL(url);
+
+      ws.close();
+
+      // recordedChunks = [];
+    };
 
     button.textContent = "End Stream 🛑";
     button.dataset.live = "true";
+
+    ws.send(JSON.stringify({ streamKey: streamKeyInput.value, fps: settings.fps }));
+
+    mediaRecorder.start(1000 / 15);
   } else {
     mediaRecorder.stop();
-
-    ws.close();
 
     button.textContent = "Go Live 🎥";
     button.dataset.live = "false";
@@ -198,3 +262,12 @@ goLiveButton.addEventListener("click", async (event) => {
 
   button.disabled = false;
 });
+
+const saveStreamKeyButton = document.getElementById("saveStreamKey") as HTMLButtonElement;
+
+saveStreamKeyButton.addEventListener("click", () => {
+  localStorage.setItem("streamKey", streamKeyInput.value);
+});
+
+const savedStreamKey = localStorage.getItem("streamKey");
+if (savedStreamKey) streamKeyInput.value = savedStreamKey;

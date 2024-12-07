@@ -30,4 +30,5 @@ body > * {
 #stream {
   margin-top: 2rem;
   border: 2px dashed #3498db;
+  max-width: 80vw;
 }
