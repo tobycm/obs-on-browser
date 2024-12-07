@@ -14,6 +14,7 @@
     "@ffmpeg/util": "^0.12.1",
     "@roamhq/wrtc": "^0.8.0",
     "tsx": "^4.19.2",
+    "valibot": "^1.0.0-beta.9",
     "ws": "^8.18.0"
   },
   "scripts": {

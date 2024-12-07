@@ -3,6 +3,8 @@ import "@fontsource/ubuntu/500.css";
 import "@fontsource/ubuntu/700.css";
 
 // import interact from "interactjs";
+import * as v from "valibot";
+import { StartFFmpeg } from "../../server/schemas";
 
 // // Make the element draggable
 // interact(".draggable").draggable({
@@ -84,7 +86,7 @@ async function startStream(from: "camera" | "screen") {
     video: {
       width: resolutions[settings.quality].width,
       height: resolutions[settings.quality].height,
-      frameRate: { ideal: settings.fps },
+      frameRate: { ideal: settings.fps * 1.1 },
     },
     audio: {
       channelCount: 2,
@@ -127,6 +129,9 @@ startStreamButton.addEventListener("click", async (event) => {
       stream = await startStream(source);
     } catch (error) {
       button.disabled = false;
+
+      console.error("Failed to start stream:", error);
+
       return;
     }
 
@@ -202,6 +207,20 @@ const mimeType = mimeTypes.find((mime) => MediaRecorder.isTypeSupported(mime)) ?
 
 console.log(`Best mimeType: ${mimeType}`);
 
+function parseCodec(mimeType: string): { video: string; audio: string } {
+  const entries = mimeType
+    .split(";")
+    .map((entry) => entry.trim())
+    .map((entry) => entry.split("="));
+  const codec = entries.find(([key]) => key === "codecs")?.[1] ?? "";
+
+  if (!codec) throw new Error("Invalid codec");
+
+  const [video, audio] = codec.split(",");
+
+  return { video, audio };
+}
+
 let mediaRecorder: MediaRecorder;
 
 goLiveButton.addEventListener("click", async (event) => {
@@ -217,12 +236,18 @@ goLiveButton.addEventListener("click", async (event) => {
       return;
     }
 
-    mediaRecorder = new MediaRecorder(stream, { mimeType, audioBitsPerSecond: 192000 });
+    mediaRecorder = new MediaRecorder(stream, {
+      mimeType,
+      audioBitsPerSecond: 192000,
+      videoBitsPerSecond: 2000000,
+      // @ts-ignore
+      videoKeyFrameIntervalDuration: 2000,
+    });
 
     // let recordedChunks: Blob[] = [];
 
     mediaRecorder.ondataavailable = (event) => {
-      console.log("MediaRecorder data available:", event.data.type, event.data.size);
+      console.debug("MediaRecorder data available:", event.data.type, event.data.size);
       // recordedChunks.push(event.data);
       if (ws.readyState === WebSocket.OPEN && event.data.size > 0) ws.send(event.data);
     };
@@ -250,7 +275,13 @@ goLiveButton.addEventListener("click", async (event) => {
     button.textContent = "End Stream 🛑";
     button.dataset.live = "true";
 
-    ws.send(JSON.stringify({ streamKey: streamKeyInput.value, fps: settings.fps }));
+    const startFfmpeg: v.InferOutput<typeof StartFFmpeg> = {
+      streamKey: streamKeyInput.value,
+      codec: parseCodec(mimeType),
+      fps: settings.fps,
+    };
+
+    ws.send(JSON.stringify(startFfmpeg));
 
     mediaRecorder.start(1000 / 15);
   } else {

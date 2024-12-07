@@ -1,10 +1,12 @@
 import { spawn } from "child_process";
+import * as v from "valibot";
 import { WebSocket, WebSocketServer } from "ws";
+import { StartFFmpeg } from "./schemas";
 
 // Create a WebSocket server for signaling
 const wss = new WebSocketServer({ port: 5000 });
 
-function startFFmpeg({ streamKey, fps }: { streamKey: string; fps: number }, ws: WebSocket) {
+function startFFmpeg({ streamKey, codec, fps }: v.InferOutput<typeof StartFFmpeg>, ws: WebSocket) {
   const ffmpeg = spawn("ffmpeg", [
     // "-loglevel",
     // "debug",
@@ -33,17 +35,17 @@ function startFFmpeg({ streamKey, fps }: { streamKey: string; fps: number }, ws:
     // "0:v", // Map video
 
     "-c:v",
-    "libx264", // Video codec
+    codec.video.startsWith("avc1") ? "copy" : "libx264", // Video codec
     "-c:a",
-    "aac", // Audio codec
+    codec.audio === "mp4a.40.2" ? "copy" : "aac", // Audio codec
     "-preset",
     "ultrafast", // Encoding preset
     "-g",
     `${fps * 2}`, // Keyframe interval
     "-f",
     "flv", // Format
-    "-filter:v",
-    `fps=${fps}`, // Output FPS
+
+    ...(codec.video.startsWith("avc1") ? [] : ["-filter:v", `fps=${fps}`]), // Output FPS
     `rtmp://live.twitch.tv/app/${streamKey}`, // Output URL
   ]);
 
@@ -63,8 +65,12 @@ function startFFmpeg({ streamKey, fps }: { streamKey: string; fps: number }, ws:
 }
 
 wss.on("connection", (ws) => {
-  const data = {
+  let data = {
     streamKey: "",
+    codec: {
+      video: "",
+      audio: "",
+    },
     fps: 30,
   };
 
@@ -75,9 +81,7 @@ wss.on("connection", (ws) => {
   ws.on("message", (message) => {
     if (!data.streamKey) {
       try {
-        const { streamKey, fps } = JSON.parse(message.toString());
-        data.streamKey = streamKey;
-        data.fps = fps;
+        data = JSON.parse(message.toString());
 
         ffmpeg = startFFmpeg(data, ws);
       } catch (error) {
