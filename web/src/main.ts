@@ -81,8 +81,10 @@ streamQualitySelect.dispatchEvent(new Event("change"));
 
 const videoElement = document.getElementById("stream") as HTMLVideoElement;
 
-async function startStream(from: "camera" | "screen") {
-  const stream = await navigator.mediaDevices[from === "camera" ? "getUserMedia" : "getDisplayMedia"]({
+async function startStream(from: "camera" | "screen" | "mic"): Promise<MediaStream> {
+  const source = from === "screen" ? navigator.mediaDevices.getDisplayMedia : navigator.mediaDevices.getUserMedia;
+
+  const options: Parameters<typeof source>[0] = {
     video: {
       width: resolutions[settings.quality].width,
       height: resolutions[settings.quality].height,
@@ -95,17 +97,30 @@ async function startStream(from: "camera" | "screen") {
       echoCancellation: false,
       noiseSuppression: false,
     },
-  });
+  };
 
-  videoElement.srcObject = stream;
-  videoElement.hidden = false;
+  if (from === "mic") {
+    options.video = false;
+  }
+  if (from === "camera") {
+    options.audio = false;
+  }
+
+  const stream = await source(options);
 
   stream.addEventListener("inactive", () => {
     console.log("Stream ended");
-
-    videoElement.srcObject = null;
-    videoElement.hidden = true;
   });
+
+  if (from === "camera" || from === "screen") {
+    videoElement.srcObject = stream;
+    videoElement.hidden = false;
+
+    stream.addEventListener("inactive", () => {
+      videoElement.srcObject = null;
+      videoElement.hidden = true;
+    });
+  }
 
   return stream;
 }
@@ -114,8 +129,8 @@ let stream: MediaStream;
 
 const goLiveButton = document.getElementById("goLive") as HTMLButtonElement;
 
-const startStreamButton = document.getElementById("startStream") as HTMLButtonElement;
-const sourceSelect = document.getElementById("streamSource") as HTMLSelectElement;
+const startStreamButton = document.getElementById("addSource") as HTMLButtonElement;
+const sourceSelect = document.getElementById("source") as HTMLSelectElement;
 
 startStreamButton.addEventListener("click", async (event) => {
   const button = event.target as HTMLButtonElement;
@@ -123,7 +138,9 @@ startStreamButton.addEventListener("click", async (event) => {
   button.disabled = true;
 
   if (button.dataset.streaming === "false") {
-    const source = sourceSelect.value as "camera" | "screen";
+    const source = sourceSelect.value as "camera" | "screen" | "mic";
+
+    // TODO: support multiple sources
 
     try {
       stream = await startStream(source);
