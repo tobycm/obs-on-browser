@@ -35,9 +35,9 @@ function startFFmpeg({ streamKey, codec, fps }: v.InferOutput<typeof StartFFmpeg
     // "0:v", // Map video
 
     "-c:v",
-    codec.video.startsWith("avc1") ? "copy" : "libx264", // Video codec
+    codec.video.startsWith("avc1") || codec.video === "h264" || codec.video === "h.264" ? "copy" : "libx264", // Video codec
     "-c:a",
-    codec.audio === "mp4a.40.2" ? "copy" : "aac", // Audio codec
+    codec.audio === "mp4a.40.2" || codec.audio === "aac" ? "copy" : "aac", // Audio codec
     "-preset",
     "ultrafast", // Encoding preset
     "-g",
@@ -88,6 +88,9 @@ wss.on("connection", (ws) => {
         console.error("Invalid JSON", error);
         ws.close();
       }
+
+      console.log("Starting session with", data.codec, data.fps);
+
       return;
     }
 

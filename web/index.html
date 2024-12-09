@@ -30,22 +30,11 @@
 
     <div>
       <label for="streamQuality">Quality:</label>
-      <select name="Stream Quality" id="streamQuality">
-        <option value="1080p">1080p</option>
-        <option value="720p" selected>720p</option>
-        <option value="480p">480p</option>
-        <option value="360p">360p</option>
-        <option value="240p">240p</option>
-      </select>
+      <select name="Stream Quality" id="streamQuality"></select>
     </div>
     <div>
       <label for="streamFps">FPS:</label>
-      <select name="StreamFPS" id="streamFps">
-        <option value="60">60</option>
-        <option value="30" selected>30</option>
-        <option value="24">24</option>
-        <option value="15">15</option>
-      </select>
+      <select name="StreamFPS" id="streamFps"></select>
     </div>
 
     <div>
@@ -53,9 +42,11 @@
       <select name="from" id="source">
         <option value="screen" selected>Screen</option>
         <option value="camera">Camera</option>
-        <option value="window">Mic</option>
+        <option value="mic">Mic</option>
       </select>
     </div>
+
+    <button id="clearAllSources">Clear all sources 🧹</button>
 
     <video id="stream" autoplay playsinline muted hidden></video>
 
@@ -68,5 +59,8 @@
     <button id="goLive" disabled data-live="false">Go Live 📺</button>
 
     <script type="module" src="/src/main.ts"></script>
+    <script type="module" src="/src/streamKey.ts"></script>
+    <script type="module" src="/src/settings.ts"></script>
+    <script type="module" src="/src/mime.ts"></script>
   </body>
 </html>
