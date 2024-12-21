@@ -4,6 +4,8 @@ import "@fontsource/ubuntu/700.css";
 
 import * as v from "valibot";
 import { StartFFmpeg } from "../../server/schemas";
+import { createAudioMeter } from "../lib/volumeMeter";
+import { getCustomRelay } from "./customRelay";
 import { mimeType as bestMimeType, parseCodec } from "./mime";
 import { settings } from "./settings";
 import { getStreamKey } from "./streamKey";
@@ -11,7 +13,7 @@ import { getWs, setWs, TobyWebSocketAsync } from "./ws";
 
 const videoElement = document.getElementById("stream") as HTMLVideoElement;
 
-async function startSource(from: "camera" | "screen" | "mic"): Promise<MediaStream> {
+async function startSource(from: "camera" | "screen" | "mic"): Promise<[MediaStream, AudioWorkletNode?]> {
   const options: Parameters<typeof navigator.mediaDevices.getDisplayMedia>[0] = {
     video: {
       ...settings.quality,
@@ -38,23 +40,51 @@ async function startSource(from: "camera" | "screen" | "mic"): Promise<MediaStre
   if (from === "screen") stream = await navigator.mediaDevices.getDisplayMedia(options);
   else stream = await navigator.mediaDevices.getUserMedia(options);
 
-  if (from !== "camera" && from !== "screen") return stream;
+  if (from == "camera" || from == "screen") {
+    videoElement.srcObject = stream;
+    videoElement.hidden = false;
 
-  videoElement.srcObject = stream;
-  videoElement.hidden = false;
+    stream.addEventListener("inactive", () => {
+      videoElement.srcObject = null;
+      videoElement.hidden = true;
+    });
+
+    return [stream];
+  }
+
+  if (!audioContext) {
+    audioContext = new AudioContext();
+    audio = audioContext.createMediaStreamDestination();
+  }
+
+  const source = audioContext.createMediaStreamSource(stream);
+
+  const meter = await createAudioMeter(audioContext);
+
+  source.connect(meter);
+  source.connect(audio!);
+
+  // let last = Date.now();
+  // meter.port.onmessage = (event) => {
+  //   const now = Date.now();
+  //   if (now - last < 1000) return;
+  //   last = now;
+
+  //   const data = event.data as VolumeData;
+  //   console.log("Volume:", data.volume);
+  // };
 
   stream.addEventListener("inactive", () => {
-    videoElement.srcObject = null;
-    videoElement.hidden = true;
+    source.disconnect(meter);
   });
 
-  return stream;
+  return [stream, meter];
 }
 
 let video: MediaStream;
-// const audioContext = new AudioContext();
-// const audio = audioContext.createMediaStreamDestination();
-let audio: MediaStream;
+let audioContext: AudioContext | undefined;
+let audio: MediaStreamAudioDestinationNode | undefined;
+// let audio: MediaStream;
 
 const goLiveButton = document.getElementById("goLive") as HTMLButtonElement;
 
@@ -71,12 +101,21 @@ addSourceButton.addEventListener("click", async (event) => {
   const from = sourceSelect.value as "camera" | "screen" | "mic";
 
   try {
-    const stream = await startSource(from);
+    const [stream, meter] = await startSource(from);
 
-    console.log(stream);
-
-    if (from === "mic") audio = stream;
     if (from === "camera" || from === "screen") video = stream;
+    if (meter) {
+      volumeMeterBar.hidden = false;
+
+      meter.port.onmessage = (event) => {
+        const data = event.data as { volume: number; clipping: boolean };
+        updateVolumeMeter(data.volume);
+      };
+
+      stream.addEventListener("inactive", () => {
+        volumeMeterBar.hidden = true;
+      });
+    }
   } catch (error) {
     button.disabled = false;
 
@@ -92,11 +131,13 @@ addSourceButton.addEventListener("click", async (event) => {
 
 clearAllSourcesButton.addEventListener("click", () => {
   video?.getTracks().forEach((track) => track.stop());
-  audio?.getTracks().forEach((track) => track.stop());
+  if (audioContext) audioContext.close();
 
   video?.dispatchEvent(new Event("inactive"));
 
   goLiveButton.disabled = true;
+  clearAllSourcesButton.disabled = true;
+  volumeMeterBar.hidden = true;
 });
 
 let mediaRecorder: MediaRecorder;
@@ -117,7 +158,7 @@ goLiveButton.addEventListener("click", async () => {
   try {
     setWs(
       await TobyWebSocketAsync({
-        url: "ws://localhost:5000",
+        url: getCustomRelay() ?? `wss://obb-relay.tobycm.dev`,
         open: () => console.log("WebSocket opened"),
         message: (message) => console.log(`WebSocket message: ${message.data}`),
         close: (event) => {
@@ -145,19 +186,22 @@ goLiveButton.addEventListener("click", async () => {
     return;
   }
 
-  // console.log([...video.getVideoTracks(), ...audio.getAudioTracks()]);
+  // console.log([
+  //   ...(video?.getVideoTracks() ?? []),
+  //   ...(audioContext?.createMediaStreamDestination().stream.getAudioTracks() ?? video.getAudioTracks()),
+  // ]);
 
-  mediaRecorder = new MediaRecorder(new MediaStream([...(video?.getVideoTracks() ?? []), ...(audio?.getAudioTracks() ?? [])]), {
-    mimeType: bestMimeType,
-    audioBitsPerSecond: 192000,
-    videoBitsPerSecond: 2000000,
-
-    // @ts-ignore
-    videoKeyFrameIntervalDuration: 2000,
-  });
+  mediaRecorder = new MediaRecorder(
+    new MediaStream([...(video?.getVideoTracks() ?? []), ...(audio?.stream.getAudioTracks() ?? video.getAudioTracks())]),
+    {
+      mimeType: bestMimeType,
+      audioBitsPerSecond: 192000,
+      videoBitsPerSecond: 2000000,
+    }
+  );
 
   mediaRecorder.addEventListener("dataavailable", (event) => {
-    console.debug("MediaRecorder data available:", event.data.type, event.data.size);
+    console.log("MediaRecorder data available:", event.data.type, event.data.size);
     const ws = getWs();
     if (ws.readyState === WebSocket.OPEN && event.data.size > 0) ws.send(event.data);
   });
@@ -183,3 +227,12 @@ goLiveButton.addEventListener("click", async () => {
 
   goLiveButton.disabled = false;
 });
+
+const volumeMeterBar = document.getElementById("volumeMeter") as HTMLProgressElement;
+
+function updateVolumeMeter(volume: number) {
+  volumeMeterBar.value = volume;
+
+  if (volume > 0.8) volumeMeterBar.setAttribute("data-volume", "high");
+  else volumeMeterBar.removeAttribute("data-volume");
+}

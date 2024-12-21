@@ -32,3 +32,30 @@ body > * {
   border: 2px dashed #3498db;
   max-width: 80vw;
 }
+
+#volumeMeter {
+  width: 20%;
+  height: 30px;
+  -webkit-appearance: none;
+  appearance: none;
+  border: none;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+/* Style the background bar */
+#volumeMeter::-webkit-progress-bar {
+  background-color: #e0e0e0;
+  border-radius: 5px;
+}
+
+/* Style the progress value */
+#volumeMeter::-webkit-progress-value {
+  background-color: #76c7c0; /* Default color */
+  transition: background-color 0.3s ease;
+  border-radius: 5px; /* Smooth corners */
+}
+
+#volumeMeter[data-volume="high"]::-webkit-progress-value {
+  background-color: #ff4d4d; /* High volume (>80%) color */
+}
