@@ -64,16 +64,6 @@ async function startSource(from: "camera" | "screen" | "mic"): Promise<[MediaStr
   source.connect(meter);
   source.connect(audio!);
 
-  // let last = Date.now();
-  // meter.port.onmessage = (event) => {
-  //   const now = Date.now();
-  //   if (now - last < 1000) return;
-  //   last = now;
-
-  //   const data = event.data as VolumeData;
-  //   console.log("Volume:", data.volume);
-  // };
-
   stream.addEventListener("inactive", () => {
     source.disconnect(meter);
   });
@@ -84,7 +74,6 @@ async function startSource(from: "camera" | "screen" | "mic"): Promise<[MediaStr
 let video: MediaStream;
 let audioContext: AudioContext | undefined;
 let audio: MediaStreamAudioDestinationNode | undefined;
-// let audio: MediaStream;
 
 const goLiveButton = document.getElementById("goLive") as HTMLButtonElement;
 
@@ -185,11 +174,6 @@ goLiveButton.addEventListener("click", async () => {
     goLiveButton.disabled = false;
     return;
   }
-
-  // console.log([
-  //   ...(video?.getVideoTracks() ?? []),
-  //   ...(audioContext?.createMediaStreamDestination().stream.getAudioTracks() ?? video.getAudioTracks()),
-  // ]);
 
   mediaRecorder = new MediaRecorder(
     new MediaStream([...(video?.getVideoTracks() ?? []), ...(audio?.stream.getAudioTracks() ?? video.getAudioTracks())]),

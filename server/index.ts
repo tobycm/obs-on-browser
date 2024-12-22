@@ -8,31 +8,11 @@ const wss = new WebSocketServer({ port: 5000 });
 
 function startFFmpeg({ streamKey, codec, fps }: v.InferOutput<typeof StartFFmpeg>, ws: WebSocket) {
   const ffmpeg = spawn("ffmpeg", [
-    // "-loglevel",
-    // "debug",
-
-    // "-f",
-    // "webm",
-
     "-fflags",
     "+nobuffer",
 
-    // "-probesize",
-    // "512K",
-    // "-analyzeduration",
-    // "2M",
-
     "-i",
     "pipe:0", // Input from stdin
-
-    // "-map",
-    // "0", // Map all streams
-
-    // "-map",
-    // "0:a", // Map audio
-
-    // "-map",
-    // "0:v", // Map video
 
     "-c:v",
     codec.video.startsWith("avc1") || codec.video === "h264" || codec.video === "h.264" ? "copy" : "libx264", // Video codec
@@ -76,8 +56,6 @@ wss.on("connection", (ws) => {
 
   let ffmpeg: ReturnType<typeof spawn>;
 
-  // let chunks: Buffer[] = [];
-
   ws.on("message", (message) => {
     if (!data.streamKey) {
       try {
@@ -94,23 +72,16 @@ wss.on("connection", (ws) => {
       return;
     }
 
-    // chunks.push(message as Buffer);
-
     ffmpeg?.stdin?.write(message);
-    // console.log(`WebSocket message: ${message.length}`);
   });
 
   ws.on("close", () => {
     ffmpeg?.stdin?.end();
     console.log(`WebSocket closed`);
-
-    // writeFileSync("video.webm", Buffer.concat(chunks));
   });
 
   ws.on("error", (err) => {
     console.error("WebSocket error:", err);
     ffmpeg?.stdin?.end();
-
-    // writeFileSync("video.webm", Buffer.concat(chunks));
   });
 });
