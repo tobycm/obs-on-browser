@@ -180,7 +180,7 @@ goLiveButton.addEventListener("click", async () => {
     {
       mimeType: bestMimeType,
       audioBitsPerSecond: 192000,
-      videoBitsPerSecond: 2000000,
+      videoBitsPerSecond: settings.quality.width < 1920 ? 5000000 : 10000000,
     }
   );
 

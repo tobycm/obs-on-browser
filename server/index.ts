@@ -4,7 +4,7 @@ import { WebSocket, WebSocketServer } from "ws";
 import { StartFFmpeg } from "./schemas";
 
 // Create a WebSocket server for signaling
-const wss = new WebSocketServer({ port: 5000 });
+const wss = new WebSocketServer({ port: parseInt(process.env.PORT ?? "5000") });
 
 function startFFmpeg({ streamKey, codec, fps }: v.InferOutput<typeof StartFFmpeg>, ws: WebSocket) {
   const ffmpeg = spawn("ffmpeg", [
