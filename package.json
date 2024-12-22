@@ -1,0 +1,7 @@
+{
+  "name": "obs-on-browser",
+  "description": "OBB - OBS on the Browser",
+  "scripts": {
+    "cloudflare-special-treatment": "cd web && bun i && bun run build"
+  }
+}
