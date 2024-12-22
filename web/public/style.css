@@ -59,3 +59,12 @@ body > * {
 #volumeMeter[data-volume="high"]::-webkit-progress-value {
   background-color: #ff4d4d; /* High volume (>80%) color */
 }
+
+#themeButton {
+  font-size: 1rem;
+}
+
+textarea {
+  border: none;
+  border-radius: 1rem;
+}

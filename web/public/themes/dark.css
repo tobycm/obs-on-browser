@@ -30,12 +30,6 @@ button:disabled {
   color: #666;
 }
 
-#themeButton {
-  font-size: 2rem;
-}
-
 textarea {
-  border: none;
-  border-radius: 1rem;
   background-color: #333;
 }
