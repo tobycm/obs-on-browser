@@ -17,6 +17,21 @@ Try it now at: [obb.tobycm.dev](https://obb.tobycm.dev)
 ### Prerequisites
 
 - [Bun](https://bun.sh)
+- [FFmpeg](https://ffmpeg.org)
+
+### 0. Install ffmpeg
+
+Debian/Ubuntu:
+
+```sh
+sudo apt install ffmpeg
+```
+
+Arch Linux:
+
+```sh
+sudo pacman -S ffmpeg
+```
 
 ### 1. Clone the repository
 

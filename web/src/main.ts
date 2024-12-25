@@ -40,7 +40,7 @@ async function startSource(from: "camera" | "screen" | "mic"): Promise<[MediaStr
   if (from === "screen") stream = await navigator.mediaDevices.getDisplayMedia(options);
   else stream = await navigator.mediaDevices.getUserMedia(options);
 
-  if (from == "camera" || from == "screen") {
+  if (options.video) {
     videoElement.srcObject = stream;
     videoElement.hidden = false;
 
@@ -48,25 +48,26 @@ async function startSource(from: "camera" | "screen" | "mic"): Promise<[MediaStr
       videoElement.srcObject = null;
       videoElement.hidden = true;
     });
-
-    return [stream];
   }
 
-  if (!audioContext) {
-    audioContext = new AudioContext();
-    audio = audioContext.createMediaStreamDestination();
+  let meter: AudioWorkletNode | undefined;
+  if (options.audio) {
+    if (!audioContext) {
+      audioContext = new AudioContext();
+      audio = audioContext.createMediaStreamDestination();
+    }
+
+    const source = audioContext.createMediaStreamSource(stream);
+
+    meter = await createAudioMeter(audioContext);
+
+    source.connect(meter);
+    source.connect(audio!);
+
+    stream.addEventListener("inactive", () => {
+      source.disconnect(meter!);
+    });
   }
-
-  const source = audioContext.createMediaStreamSource(stream);
-
-  const meter = await createAudioMeter(audioContext);
-
-  source.connect(meter);
-  source.connect(audio!);
-
-  stream.addEventListener("inactive", () => {
-    source.disconnect(meter);
-  });
 
   return [stream, meter];
 }
