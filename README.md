@@ -1,10 +1,8 @@
-<div style="display: flex; width: 100%">
-    <img src="./web/public/favicon.svg" style="margin: 0 auto; height: 200px">
-</div>
-
 # OBB - OBS on the Browser
 
 Try it now at: [obb.tobycm.dev](https://obb.tobycm.dev)
+
+Demo: [https://youtu.be/6pOYhUaqFQc](https://youtu.be/6pOYhUaqFQc)
 
 ## 💪 Features
 
