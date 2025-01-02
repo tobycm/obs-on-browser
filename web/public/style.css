@@ -68,3 +68,14 @@ textarea {
   border: none;
   border-radius: 1rem;
 }
+
+body,
+input,
+select,
+button {
+  transition: background-color 0.3s ease-in-out;
+}
+
+* {
+  transition: color 0.3s ease-in-out;
+}

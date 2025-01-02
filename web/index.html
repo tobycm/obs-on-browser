@@ -42,7 +42,7 @@
     </div>
 
     <div>
-      <button id="addSource" data-streaming="false">Add</button>
+      <button id="addSource">Add</button>
       <select name="from" id="source">
         <option value="screen" selected>Screen</option>
         <option value="camera">Camera</option>
@@ -68,7 +68,13 @@
       <button id="saveCustomRelay">Save</button>
     </div>
 
-    <button id="goLive" disabled data-live="false">Go Live 📺</button>
+    <button id="record" disabled>Start Recording 🎥</button>
+    <button id="goLive" disabled>Go Live 📺</button>
+
+    <div>
+      <input type="checkbox" name="Start recording with go live" id="useSameEncoder" />
+      <label for="useSameEncoder"> Start recording with go live </label>
+    </div>
 
     <script type="module" src="/src/main.ts"></script>
     <script type="module" src="/src/streamKey.ts"></script>

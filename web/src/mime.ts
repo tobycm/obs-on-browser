@@ -1,4 +1,4 @@
-const mimeTypes = [
+export const mimeTypes = [
   "video/webm; codecs=avc1.42E01E, mp4a.40.2",
   "video/webm; codecs=avc1.42E01E, aac",
   "video/webm; codecs=avc1.42E01E, opus",
@@ -21,10 +21,6 @@ const mimeTypes = [
   "video/webm; codecs=vp8, aac",
   "video/webm; codecs=vp8, opus",
 ];
-
-export const mimeType = mimeTypes.find((mime) => MediaRecorder.isTypeSupported(mime)) ?? "video/webm; codecs=vp8, opus";
-
-console.log(`Best mimeType: ${mimeType}`);
 
 export function parseCodec(mimeType: string): { video: string; audio: string } {
   const entries = mimeType

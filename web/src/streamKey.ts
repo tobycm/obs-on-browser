@@ -18,3 +18,5 @@ const savedStreamKey = localStorage.getItem("streamKey");
 if (savedStreamKey) streamKeyInput.value = savedStreamKey;
 
 export const getStreamKey = () => streamKeyInput.value;
+
+// making multiple factories for different platforms

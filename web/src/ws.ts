@@ -27,8 +27,6 @@ export default class TobyWebSocket extends WebSocket {
   }
 }
 
-let ws: TobyWebSocket;
-
 export const TobyWebSocketAsync = (...options: ConstructorParameters<typeof TobyWebSocket>) =>
   new Promise<TobyWebSocket>((resolve, reject) => {
     try {
@@ -38,8 +36,3 @@ export const TobyWebSocketAsync = (...options: ConstructorParameters<typeof Toby
       reject(error);
     }
   });
-
-export const getWs = () => ws;
-export const setWs = (newWs: TobyWebSocket) => {
-  ws = newWs;
-};
