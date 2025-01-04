@@ -2,7 +2,6 @@ import * as v from "valibot";
 import { StartFFmpeg } from "../../server/schemas";
 import app from "./app";
 import { parseCodec } from "./mime";
-import { getStreamKey } from "./streamKey";
 import { TobyWebSocketAsync } from "./ws";
 
 app.e.goLive.addEventListener("click", async () => {
@@ -61,7 +60,8 @@ app.on("liveStart", async () => {
   app.e.goLive.dataset.live = "true";
 
   const startFfmpeg: v.InferOutput<typeof StartFFmpeg> = {
-    streamKey: getStreamKey(),
+    destination: "twitch",
+    streamKey: app.settings.streamKey,
     codec: parseCodec(app.bestMime),
     fps: app.videoSettings.fps,
   };

@@ -68,17 +68,25 @@
       <button id="saveCustomRelay">Save</button>
     </div>
 
-    <button id="record" disabled>Start Recording 🎥</button>
-    <button id="goLive" disabled>Go Live 📺</button>
-
-    <div>
-      <input type="checkbox" name="Start recording with go live" id="useSameEncoder" />
-      <label for="useSameEncoder"> Start recording with go live </label>
+    <div class="flex column">
+      <div class="flex row" style="width: 100%">
+        <select name="from" id="destination">
+          <option value="twitch" selected>Twitch</option>
+          <option value="youtube">YouTube</option>
+        </select>
+        <button id="goLive" style="width: 100%" disabled>Go Live 📺</button>
+      </div>
+      <button id="record" disabled>Start Recording 🎥</button>
+      <div>
+        <input type="checkbox" name="Start recording with go live" id="useSameEncoder" />
+        <label for="useSameEncoder"> Start recording with go live </label>
+      </div>
     </div>
 
     <script type="module" src="/src/main.ts"></script>
     <script type="module" src="/src/streamKey.ts"></script>
     <script type="module" src="/src/customRelay.ts"></script>
+    <script type="module" src="/src/destination.ts"></script>
     <script type="module" src="/src/settings.ts"></script>
     <script type="module" src="/src/mime.ts"></script>
   </body>

@@ -1,4 +1,6 @@
 import { TypedEventTarget } from "typescript-event-target";
+import * as v from 'valibot';
+import { StartFFmpeg } from "../../server/schemas";
 import { resolutions } from "./common";
 import { Events } from "./events";
 import { mimeTypes } from "./mime";
@@ -17,10 +19,12 @@ export class App extends TypedEventTarget<Events> {
     useSameEncoder: boolean;
     customRelay: string;
     streamKey: string;
+    destination: v.InferOutput<typeof StartFFmpeg>["destination"];
   } = {
     useSameEncoder: false,
     customRelay: "wss://obb-relay.tobycm.dev",
     streamKey: "",
+    destination: "twitch",
   };
 
   state: {

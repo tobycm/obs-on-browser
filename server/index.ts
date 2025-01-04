@@ -3,10 +3,16 @@ import * as v from "valibot";
 import { WebSocket, WebSocketServer } from "ws";
 import { StartFFmpeg } from "./schemas";
 
-// Create a WebSocket server for signaling
+const destinations = {
+  twitch: "rtmp://live.twitch.tv/app/",
+  youtube: "rtmp://a.rtmp.youtube.com/live2/",
+} as const;
+
 const wss = new WebSocketServer({ port: parseInt(process.env.PORT ?? "5000") });
 
-function startFFmpeg({ streamKey, codec, fps }: v.InferOutput<typeof StartFFmpeg>, ws: WebSocket) {
+function startFFmpeg({ destination, streamKey, codec, fps }: v.InferOutput<typeof StartFFmpeg>, ws: WebSocket) {
+  const url = destinations[destination] + streamKey;
+
   const ffmpeg = spawn("ffmpeg", [
     "-fflags",
     "+nobuffer",
@@ -26,7 +32,8 @@ function startFFmpeg({ streamKey, codec, fps }: v.InferOutput<typeof StartFFmpeg
     "flv", // Format
 
     ...(codec.video.startsWith("avc1") ? [] : ["-filter:v", `fps=${fps}`]), // Output FPS
-    `rtmp://live.twitch.tv/app/${streamKey}`, // Output URL
+
+    url,
   ]);
 
   ffmpeg.stderr.on("data", (data) => {
@@ -45,7 +52,8 @@ function startFFmpeg({ streamKey, codec, fps }: v.InferOutput<typeof StartFFmpeg
 }
 
 wss.on("connection", (ws) => {
-  let data = {
+  let data: v.InferOutput<typeof StartFFmpeg> = {
+    destination: "twitch",
     streamKey: "",
     codec: {
       video: "",

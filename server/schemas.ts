@@ -6,6 +6,7 @@ export const Codec = v.object({
 });
 
 export const StartFFmpeg = v.object({
+  destination: v.union([v.literal("twitch"), v.literal("youtube")]),
   streamKey: v.pipe(v.string(), v.minLength(1), v.maxLength(2048)),
   codec: Codec,
   fps: v.pipe(v.number(), v.minValue(1), v.maxValue(60)),

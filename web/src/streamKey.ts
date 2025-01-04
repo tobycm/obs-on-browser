@@ -1,3 +1,5 @@
+import app from "./app";
+
 const goLiveButton = document.getElementById("goLive") as HTMLButtonElement;
 
 const streamKeyInput = document.getElementById("streamKey") as HTMLInputElement;
@@ -6,6 +8,8 @@ streamKeyInput.addEventListener("change", (event) => {
   const streamKey = target.value;
 
   goLiveButton.disabled = !streamKey;
+
+  app.settings.streamKey = streamKey;
 });
 
 const saveStreamKeyButton = document.getElementById("saveStreamKey") as HTMLButtonElement;
@@ -15,8 +19,7 @@ saveStreamKeyButton.addEventListener("click", () => {
 });
 
 const savedStreamKey = localStorage.getItem("streamKey");
-if (savedStreamKey) streamKeyInput.value = savedStreamKey;
-
-export const getStreamKey = () => streamKeyInput.value;
-
-// making multiple factories for different platforms
+if (savedStreamKey) {
+  streamKeyInput.value = savedStreamKey;
+  streamKeyInput.dispatchEvent(new Event("change"));
+}
