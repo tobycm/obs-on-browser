@@ -39,8 +39,10 @@ app.on("liveStart", async () => {
     return;
   }
 
+  console.log([...(app.video?.getVideoTracks() ?? []), ...(app.audioInputs > 0 ? app.audioDestination?.stream.getAudioTracks() ?? [] : [])]);
+
   app.mediaRecorder = new MediaRecorder(
-    new MediaStream([...(app.video?.getVideoTracks() ?? []), ...(app.audioDestination?.stream.getAudioTracks() ?? [])]),
+    new MediaStream([...(app.video?.getVideoTracks() ?? []), ...(app.audioInputs > 0 ? app.audioDestination?.stream.getAudioTracks() ?? [] : [])]),
     {
       mimeType: app.bestMime,
       audioBitsPerSecond: 192000,
@@ -60,7 +62,7 @@ app.on("liveStart", async () => {
   app.e.goLive.dataset.live = "true";
 
   const startFfmpeg: v.InferOutput<typeof StartFFmpeg> = {
-    destination: "twitch",
+    destination: app.settings.destination,
     streamKey: app.settings.streamKey,
     codec: parseCodec(app.bestMime),
     fps: app.videoSettings.fps,
@@ -70,9 +72,15 @@ app.on("liveStart", async () => {
 
   app.mediaRecorder.start(1000 / 15);
 
+  if (app.settings.useSameEncoder) {
+    app.emit("recordingStart", new Event("recordingStart"));
+  }
+
   console.log("MediaRecorder started.", "Settings:", app.videoSettings);
 
   app.e.goLive.disabled = false;
+
+  app.state.live = true;
 });
 
 app.on("liveStop", () => {
@@ -85,4 +93,6 @@ app.on("liveStop", () => {
   app.mediaRecorder = undefined;
 
   app.e.goLive.textContent = "Go Live 📺";
+
+  app.state.live = false;
 });

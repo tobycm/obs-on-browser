@@ -1,4 +1,4 @@
-import { createAudioMeter } from "lib/volumeMeter";
+import { createAudioMeter } from "../lib/volumeMeter";
 import app from "./app";
 import { randomString } from "./common";
 import { StopSourceEvent, VideoStartEvent } from "./events";
@@ -49,25 +49,39 @@ async function startSource<From = "camera" | "screen" | "mic">(from: From): Prom
       app.audioDestination = app.audioContext.createMediaStreamDestination();
     }
 
-    const source = app.audioContext.createMediaStreamSource(stream);
-    app.on("stopSource", (event) => {
-      if (event.id !== id) return;
-      source.disconnect();
-      meter?.disconnect();
-    });
+    try {
+      if (!stream.getAudioTracks().length) {
+        throw new DOMException("No audio tracks in MediaStream", "NotFoundError");
+      }
+      const source = app.audioContext.createMediaStreamSource(stream);
 
-    meter = await createAudioMeter(app.audioContext);
+      app.on("stopSource", (event) => {
+        if (event.id !== id) return;
+        source.disconnect();
+        meter?.disconnect();
+      });
 
-    source.connect(meter);
-    source.connect(app.audioDestination!);
+      meter = await createAudioMeter(app.audioContext);
 
-    stream.addEventListener("inactive", () => {
-      app.emit("stopSource", new StopSourceEvent(id));
-    });
+      source.connect(meter);
+      source.connect(app.audioDestination!);
 
-    app.on("clearAllSources", () => {
-      app.emit("stopSource", new StopSourceEvent(id));
-    });
+      stream.addEventListener("inactive", () => {
+        app.emit("stopSource", new StopSourceEvent(id));
+      });
+
+      app.on("clearAllSources", () => {
+        app.emit("stopSource", new StopSourceEvent(id));
+      });
+
+      app.audioInputs += 1;
+    } catch (e) {
+      if (e instanceof DOMException && e.message === "No audio tracks in MediaStream") {
+        console.warn("No audio tracks in stream");
+      }
+
+      console.error("Failed to create audio source:", e);
+    }
   }
 
   app.emit("newSource", new Event("newSource"));

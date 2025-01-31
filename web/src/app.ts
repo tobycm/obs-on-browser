@@ -1,5 +1,5 @@
 import { TypedEventTarget } from "typescript-event-target";
-import * as v from 'valibot';
+import * as v from "valibot";
 import { StartFFmpeg } from "../../server/schemas";
 import { resolutions } from "./common";
 import { Events } from "./events";
@@ -50,9 +50,11 @@ export class App extends TypedEventTarget<Events> {
 
   video?: MediaStream;
   audioContext?: AudioContext;
+  audioInputs = 0;
   audioDestination?: MediaStreamAudioDestinationNode;
 
   mediaRecorder?: MediaRecorder;
+  _recordingBuffer: Blob[] = [];
 
   bestMime = mimeTypes.find((mime) => MediaRecorder.isTypeSupported(mime)) ?? "video/webm; codecs=vp8, opus";
 
@@ -65,7 +67,11 @@ export class App extends TypedEventTarget<Events> {
   on: TypedEventTarget<Events>["addEventListener"] = this.addEventListener.bind(this);
   off: TypedEventTarget<Events>["removeEventListener"] = this.removeEventListener.bind(this);
 
-  emit: TypedEventTarget<Events>["dispatchTypedEvent"] = this.dispatchTypedEvent.bind(this);
+  emit(...args: Parameters<TypedEventTarget<Events>["dispatchTypedEvent"]>): boolean {
+    console.debug("Emitting event:", ...args);
+
+    return this.dispatchTypedEvent(...args);
+  }
 }
 
 const app = new App();
