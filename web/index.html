@@ -15,8 +15,6 @@
     <meta property="og:url" content="https://obb.tobycm.dev/" />
     <meta property="og:site_name" content="Open Broadcasting software on the Browser" />
 
-    <link rel="stylesheet" href="style.css" />
-
     <link rel="stylesheet" id="theme" href="/themes/light.css" />
     <link rel="preload" href="/themes/dark.css" as="style" />
 
@@ -28,60 +26,82 @@
     <!-- <img src="/favicon.svg" alt="OBB - OBS on the Browser logo" style="height: 10vh; margin-top: 2rem" /> -->
     <h1 style="margin-bottom: 1.5rem">OBB - OBS on the Browser</h1>
 
-    <div style="float: right">
-      <button id="themeButton">🔆</button>
-    </div>
-
-    <div>
-      <label for="streamQuality">Quality:</label>
-      <select name="Stream Quality" id="streamQuality"></select>
-    </div>
-    <div>
-      <label for="streamFps">FPS:</label>
-      <select name="StreamFPS" id="streamFps"></select>
-    </div>
-
-    <div>
-      <button id="addSource">Add</button>
-      <select name="from" id="source">
-        <option value="screen" selected>Screen</option>
-        <option value="camera">Camera</option>
-        <option value="mic">Mic</option>
-      </select>
-    </div>
-
-    <button id="clearAllSources" disabled>Clear all sources 🧹</button>
-
     <video id="stream" autoplay playsinline muted hidden></video>
 
     <progress id="volumeMeter" value="0" max="1" hidden></progress>
 
-    <div>
-      <label for="streamKey">Stream Key:</label>
-      <input type="password" id="streamKey" placeholder="Stream Key" />
-      <button id="saveStreamKey">Save</button>
-    </div>
-
-    <div>
-      <label for="customRelay">Custom Relay:</label>
-      <input type="text" id="customRelay" placeholder="Relay URL" value="wss://obb-relay.tobycm.dev" />
-      <button id="saveCustomRelay">Save</button>
-    </div>
-
-    <div class="flex column">
-      <div class="flex row" style="width: 100%">
-        <select name="from" id="destination">
-          <option value="twitch" selected>Twitch</option>
-          <option value="youtube">YouTube</option>
-        </select>
-        <button id="goLive" style="width: 100%" disabled>Go Live 📺</button>
+    <div class="flex row" id="controls">
+      <div class="flex column">
+        <div class="flex row">
+          <button id="addSource">Add</button>
+          <select name="from" id="source">
+            <option value="screen" selected>Screen</option>
+            <option value="camera">Camera</option>
+            <option value="mic">Mic</option>
+          </select>
+        </div>
+        <button id="clearAllSources" disabled>Clear all sources 🧹</button>
       </div>
-      <button id="record" disabled>Start Recording 🎥</button>
-      <div>
-        <input type="checkbox" name="Start recording with go live" id="useSameEncoder" />
-        <label for="useSameEncoder"> Start recording with go live </label>
+      <div class="flex column">
+        <button id="goLive" disabled>Go Live 📺</button>
+        <button id="record" disabled>Start Recording 🎥</button>
+        <button id="openSettings">Settings ⚙️</button>
       </div>
     </div>
+
+    <dialog id="settings">
+      <details>
+        <summary>General</summary>
+        <label for="themeButton">Toggle theme: </label>
+        <button id="themeButton">🔆</button>
+      </details>
+
+      <details>
+        <summary>🎞️ Video</summary>
+        <div>
+          <label for="streamQuality">Quality:</label>
+          <select name="Stream Quality" id="streamQuality"></select>
+        </div>
+        <div>
+          <label for="streamFps">FPS:</label>
+          <select name="StreamFPS" id="streamFps"></select>
+        </div>
+      </details>
+
+      <details>
+        <summary>📹 Recording&nbsp;&nbsp;&nbsp;</summary>
+        <div>
+          <label for="destination">Stream to:</label>
+          <select name="from" id="destination">
+            <option value="twitch" selected>Twitch</option>
+            <option value="youtube">YouTube</option>
+          </select>
+        </div>
+        <div>
+          <input type="checkbox" name="Start recording with go live" id="useSameEncoder" />
+          <label for="useSameEncoder">Start recording with go live</label>
+        </div>
+      </details>
+
+      <details>
+        <summary>🔴 Streaming</summary>
+        <div>
+          <label for="streamKey">Stream Key:</label>
+          <input type="password" id="streamKey" placeholder="Stream Key" />
+          <button id="saveStreamKey">Save</button>
+        </div>
+
+        <div>
+          <label for="customRelay">Custom Relay:</label>
+          <input type="text" id="customRelay" placeholder="Relay URL" value="wss://obb-relay.tobycm.dev" />
+          <button id="saveCustomRelay">Save</button>
+        </div>
+      </details>
+
+      <a id="closeSettings">❌</a>
+    </dialog>
+
+    <span id="error"></span>
 
     <script type="module" src="/src/main.ts"></script>
     <script type="module" src="/src/streamKey.ts"></script>

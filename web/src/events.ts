@@ -38,9 +38,29 @@ export class FPSChangeEvent extends Event {
   }
 }
 
+export class StreamKeyChangeEvent extends Event {
+  value: string;
+
+  constructor(streamKey: string) {
+    super("streamKeyChange");
+    this.value = streamKey;
+  }
+}
+
+export class RelayChangeEvent extends Event {
+  value: string;
+
+  constructor(relay: string) {
+    super("relayChange");
+    this.value = relay;
+  }
+}
+
 export interface Events {
   resolutionChange: ResolutionChangeEvent;
   fpsChange: FPSChangeEvent;
+  streamKeyChange: StreamKeyChangeEvent;
+  relayChange: RelayChangeEvent;
 
   clearAllSources: Event;
 

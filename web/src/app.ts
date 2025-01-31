@@ -46,6 +46,7 @@ export class App extends TypedEventTarget<Events> {
     addSource: document.getElementById("addSource") as HTMLButtonElement,
     clearAllSources: document.getElementById("clearAllSources") as HTMLButtonElement,
     source: document.getElementById("source") as HTMLSelectElement,
+    error: document.getElementById("error") as HTMLSpanElement,
   };
 
   video?: MediaStream;

@@ -96,3 +96,45 @@ button {
   justify-content: center;
   align-items: center;
 }
+
+#source {
+  flex-grow: 1;
+}
+
+#controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#controls > * {
+  margin: 0.5rem;
+}
+
+#settings {
+  margin: auto;
+}
+
+#settings > details > summary {
+  cursor: pointer;
+  font-size: 1.5rem;
+  margin: 1rem;
+}
+
+#settings > details > * {
+  margin: 1rem;
+}
+
+#closeSettings {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 1rem;
+  font-size: 1.5rem;
+  color: red;
+}
+
+#error {
+  color: red;
+  font-size: 1rem;
+}

@@ -45,3 +45,15 @@ for (const fps of fpsOptions.reverse()) {
 
 streamQualitySelect.dispatchEvent(new Event("change"));
 streamFpsSelect.dispatchEvent(new Event("change"));
+
+const settings = document.getElementById("settings") as HTMLDialogElement;
+const openSettings = document.getElementById("openSettings") as HTMLButtonElement;
+
+openSettings.addEventListener("click", () => {
+  settings.showModal();
+});
+
+const closeSettings = document.getElementById("closeSettings") as HTMLAnchorElement;
+closeSettings.addEventListener("click", () => {
+  settings.close();
+});
