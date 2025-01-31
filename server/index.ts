@@ -13,6 +13,8 @@ const wss = new WebSocketServer({ port: parseInt(process.env.PORT ?? "5000") });
 function startFFmpeg({ destination, streamKey, codec, fps }: v.InferOutput<typeof StartFFmpeg>, ws: WebSocket) {
   const url = destinations[destination] + streamKey;
 
+  console.log(url);
+
   const ffmpeg = spawn("ffmpeg", [
     "-fflags",
     "+nobuffer",
